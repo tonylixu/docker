@@ -85,3 +85,26 @@ drwx------   3 root root  4096 Sep 10 14:56
 31da096dd0f2e231ff2f7f18d6e96cd9a71178f3955643f9d0f0bf3cf76f212c/
 ```
 Notice that the image layer IDs do not correspond to the directory IDs.
+
+### The container layer
+Containers also exist on-disk in the Docker host’s filesystem under
+/var/lib/docker/overlay/. If you list a running container’s subdirectory using
+the ls -l command, three directories and one file exist:
+```bash
+$ ls -l accc492bb2ab05e00c76481f62632aa401fdce6ac9d81a790579b62367497bde-init
+total 16
+-rw-r--r-- 1 root root   64 Aug 31 02:18 lower-id
+drwx------ 2 root root 4096 Aug 31 02:18 merged
+drwxr-xr-x 4 root root 4096 Aug 31 02:18 upper
+drwx------ 3 root root 4096 Aug 31 02:18 work
+```
+The lower-id file contains the ID of the top layer of the image the container
+is based on, which is the OverlayFS lowerdir.
+
+The upper directory contains the contents of the container’s read-write layer,
+which corresponds to the OverlayFS upperdir.
+
+The merged directory is the union mount of the lowerdir and upperdir, which
+comprises the view of the filesystem from within the running container.
+
+The work directory is internal to OverlayFS.
